@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Модуль АІС обліку замовлень залізничних квитків</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+    <header>
+        <h1>Модуль АІС обліку замовлень залізничних квитків</h1>
+        <p>Демо-версія роботи із замовленнями, квитками, додатковими послугами та передзамовленнями</p>
+    </header>
+
+    <main>
+        <div class="grid-2">
+
+            <!-- ЛІВА КОЛОНКА: пошук, результати, оформлення -->
+            <div>
+                <!-- Пошук рейсу -->
+                <section class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Пошук рейсу</div>
+                            <div class="card-subtitle">Обрати напрямок, дату та тип маршруту</div>
+                        </div>
+                        <div class="badge">
+                            <span class="badge-dot"></span>
+                            Пошук за демо-даними
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fromStation">Станція відправлення</label>
+                            <select id="fromStation"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="toStation">Станція прибуття</label>
+                            <select id="toStation"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="searchDate">Дата поїздки</label>
+                            <input type="date" id="searchDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="routeTypeSelect">Тип маршруту</label>
+                            <select id="routeTypeSelect">
+                                <option value="any">Будь-який</option>
+                                <option value="direct">Прямий</option>
+                                <option value="transfer">З пересадкою</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <button id="btnSearchRoutes" class="btn-primary">🔍 Знайти рейси</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Результати пошуку -->
+                <section class="card" id="resultsSection">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Знайдені рейси</div>
+                            <div class="card-subtitle">Обрати конкретний рейс або маршрут з пересадками</div>
+                        </div>
+                    </div>
+
+                    <div class="results-table-wrapper">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Поїзд</th>
+                                <th>Напрямок</th>
+                                <th>Час</th>
+                                <th>Тип</th>
+                                <th>Ціна від</th>
+                                <th>Дії</th>
+                            </tr>
+                            </thead>
+                            <tbody id="routesTableBody">
+                            <tr>
+                                <td colspan="6">Спочатку оберіть станції та натисніть «Знайти рейси».</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="stops-small">
+                        Для кожного рейсу можна подивитися проміжні станції та час стоянки.
+                    </p>
+                </section>
+
+                <!-- Оформлення замовлення -->
+                <section class="card" id="orderFormSection">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Оформлення замовлення</div>
+                            <div class="card-subtitle">
+                                Пасажир, тип квитка, вагон, місце, послуги, передзамовлення / оплата
+                            </div>
+                        </div>
+                        <span class="pill">
+                            <span class="pill-dot"></span>
+                            <span id="selectedRouteInfo">Маршрут не обрано</span>
+                        </span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="passengerSelect">Пасажир</label>
+                            <select id="passengerSelect"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ticketTypeSelect">Тип квитка</label>
+                            <select id="ticketTypeSelect"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="carTypeSelect">Тип вагона</label>
+                            <select id="carTypeSelect"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="seatNumber">Номер місця</label>
+                            <input type="text" id="seatNumber" placeholder="Напр. 12">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="carNumber">Номер вагона</label>
+                            <input type="text" id="carNumber" placeholder="Напр. 5">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="withChild">
+                                З маленькою дитиною
+                            </label>
+                            <div class="hint">
+                                Для немовлят без місця можна використовувати спеціальний тип квитка.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="withAnimal">
+                                Місце для тварини
+                            </label>
+                            <div class="hint">
+                                Додається як окрема послуга (наприклад, перевезення тварини).
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="withBaggage">
+                                Великий багаж
+                            </label>
+                            <div class="hint">
+                                Оформлюється як додатковий багаж у вагоні.
+                            </div>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label>Додаткові послуги</label>
+                            <div id="servicesList" class="hint">
+                                <!-- скрипт намалює список послуг -->
+                            </div>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label>
+                                <input type="checkbox" id="doubleCoupeCheckbox">
+                                Купе на двох (викупити два місця в купе)
+                            </label>
+                            <small class="hint">
+                                Система створює два квитки в одному замовленні, а сума збільшується вдвічі.
+                            </small>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label>Режим оплати</label>
+                            <div class="radio-row">
+                                <label>
+                                    <input type="radio" name="paymentMode" value="pay" checked>
+                                    Оплата зараз
+                                </label>
+                                <label>
+                                    <input type="radio" name="paymentMode" value="preorder">
+                                    Передзамовлення (бронь)
+                                </label>
+                            </div>
+                            <small class="hint">
+                                Передзамовлення діє обмежений час, після чого оплата стає неможливою.
+                            </small>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label for="paymentMethod">Спосіб оплати</label>
+                            <select id="paymentMethod">
+                                <option value="Готівка">Готівка</option>
+                                <option value="Банківська картка">Банківська картка</option>
+                                <option value="Приват24">Приват24</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <div class="btn-row">
+                                <button id="btnCalcPrice" class="btn-secondary">💰 Розрахувати ціну</button>
+                                <button id="btnConfirmOrder" class="btn-primary">✅ Підтвердити замовлення</button>
+                                <span id="calcPriceResult" class="hint"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ПРАВА КОЛОНКА: квиток + журнал замовлень -->
+            <div>
+                <!-- Квиток -->
+                <section id="ticketSection" class="card hidden">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Електронний квиток (демо)</div>
+                            <div class="card-subtitle">Макет квитка, який можна роздрукувати</div>
+                        </div>
+                        <button id="btnPrintTicket" class="btn-outline">🖨 Друк квитка</button>
+                    </div>
+                    <div id="ticketContent" class="ticket">
+                        <!-- Скрипт намалює вміст квитка -->
+                    </div>
+                </section>
+
+                <!-- Журнал замовлень -->
+                <section id="ordersLogSection" class="card hidden">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Журнал замовлень</div>
+                            <div class="card-subtitle">Список оформлених замовлень за період</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ordersDateFrom">Дата від</label>
+                            <input type="date" id="ordersDateFrom">
+                        </div>
+                        <div class="form-group">
+                            <label for="ordersDateTo">Дата до</label>
+                            <input type="date" id="ordersDateTo">
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="ordersPassenger">Пасажир</label>
+                            <select id="ordersPassenger">
+                                <option value="">Усі пасажири</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-group-full">
+                            <button id="btnShowOrders" class="btn-secondary">📜 Показати замовлення</button>
+                        </div>
+                    </div>
+
+                    <div class="results-table-wrapper" style="margin-top: 8px;">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Пасажир</th>
+                                <th>Маршрут</th>
+                                <th>Сума</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="6">Замовлень поки що немає.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Панель проміжних станцій -->
+<div id="stopsPanel">
+    <div id="stopsPanelInner">
+        <div id="stopsCloseRow">
+            <h3 id="stopsTitle">Проміжні станції</h3>
+            <button id="btnCloseStops" class="btn-outline btn-xs">Закрити</button>
+        </div>
+        <div id="stopsTableWrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Станція</th>
+                    <th>Прибуття</th>
+                    <th>Відправлення</th>
+                    <th>Стоянка</th>
+                </tr>
+                </thead>
+                <tbody id="stopsTableBody">
+                </tbody>
+            </table>
+        </div>
+        <p class="stops-small">
+            Дані про проміжні станції моделюють таблицю <strong>TripStops</strong> із бази <strong>RailwayTicketsDB_V3</strong>.
+        </p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
